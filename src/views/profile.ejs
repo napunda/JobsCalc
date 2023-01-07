@@ -31,14 +31,14 @@
         <h2><%= profile.name %></h2>
         <p>
           O valor da sua hora é <br />
-          <strong>R$ 75,00</strong>
+          <strong>R$ <%= profile.hoursValue.toFixed(2) %> </strong>
         </p>
         <button class="button green" form="form-profile" type="submit">
           Salvar dados
         </button>
       </aside>
       <main>
-        <form id="form-profile">
+        <form id="form-profile" method="post" action="/meu-perfil">
           <fieldset>
             <legend>Dados do perfil</legend>
             <div class="separator light"></div>
@@ -82,7 +82,7 @@
                   id="monthly-budget"
                   name="monthly-budget"
                   placeholder="R$"
-                  value="<%= profile.monthlyBudget %>"
+                  value="R$ <%= profile.monthlyBudget.toFixed(2) %>"
                 />
               </div>
 
