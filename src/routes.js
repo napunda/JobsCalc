@@ -14,15 +14,26 @@ let profile = {
 const Job = {
   data: [],
 
+  services: {
+    getJobFromParams(req) {
+      // const CurrentJobId = req.params.job.replace(/[^0-9]/g, "");
+      const CurrentJobId = req.params.job.split("-")[1];
+
+      return Job.data.find((job) => Number(job.id) === Number(CurrentJobId));
+    },
+  },
+
   controllers: {
     home(req, res) {
       res.render("index", { jobs: Job.data, profile });
     },
+
     newJob(req, res) {
       const job = {
         id: Job.data.length ? Job.data[Job.data.length - 1].id + 1 : 1,
         name: req.body.name,
-        dailyHours: req.body["daily-hours"],
+        dailyHours: Number(req.body["daily-hours"].trim()),
+        totalHours: Number(req.body["total-hours"].trim()),
         amount: (profile.hoursValue * req.body["total-hours"]).toFixed(2),
         createdAt: Date.now(),
         dueDate:
@@ -35,15 +46,43 @@ const Job = {
       Job.data.push(job);
       return res.redirect("/");
     },
+
     job(req, res) {
       res.render("job");
     },
-    jobEdit(req, res) {
-      res.render("job-edit");
+
+    jobEditView(req, res) {
+      const CurrentJob = Job.services.getJobFromParams(req);
+
+      if (!CurrentJob) {
+        return res.send("Job não encontrado!");
+      }
+
+      res.render("job-edit", { job: CurrentJob });
     },
+
+    jobEdit(req, res) {
+      const CurrentJobId = req.params.job.split("-")[1];
+      const CurrentJob = Job.services.getJobFromParams(req);
+
+      Job.data = Job.data.map((job) => {
+        if (Number(job.id) === Number(CurrentJobId)) {
+          return {
+            ...job,
+            dailyHours: Number(req.body["daily-hours"].trim()),
+            totalHours: Number(req.body["total-hours"].trim()),
+            amount: (profile.hoursValue * req.body["total-hours"]).toFixed(2),
+          };
+        }
+      });
+
+      return res.redirect(`/job/${CurrentJob.name}-${CurrentJobId}`);
+    },
+
     profile(req, res) {
       res.render("profile", { profile });
     },
+
     updateProfile(req, res) {
       const monthlyBudget = Number(
         req.body["monthly-budget"].replace("R$", "")
@@ -70,10 +109,11 @@ const Job = {
 
 routes.get("/", Job.controllers.home);
 routes.get("/job", Job.controllers.job);
-routes.get("/job/editar", Job.controllers.jobEdit);
+routes.get("/job/:job", Job.controllers.jobEditView);
 routes.get("/meu-perfil", Job.controllers.profile);
 
 routes.post("/meu-perfil", Job.controllers.updateProfile);
 routes.post("/job", Job.controllers.newJob);
+routes.post("/job/:job", Job.controllers.jobEdit);
 
 module.exports = routes;

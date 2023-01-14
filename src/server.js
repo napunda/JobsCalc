@@ -3,9 +3,9 @@ const routes = require("./routes");
 var path = require("path");
 const { urlencoded } = require("express");
 
-const server = express({ extends: true });
+const server = express();
 
-server.use(urlencoded());
+server.use(express.urlencoded({extended:true}));
 server.set("view engine", "ejs");
 
 // Setting directories
