@@ -69,14 +69,33 @@ const Job = {
         if (Number(job.id) === Number(CurrentJobId)) {
           return {
             ...job,
+            name: req.body.name.trim(),
             dailyHours: Number(req.body["daily-hours"].trim()),
             totalHours: Number(req.body["total-hours"].trim()),
             amount: (profile.hoursValue * req.body["total-hours"]).toFixed(2),
+            dueDate:
+              Date.now() +
+              (req.body["total-hours"] / req.body["daily-hours"]) *
+                24 *
+                3600 *
+                1000,
           };
         }
       });
 
       return res.redirect(`/job/${CurrentJob.name}-${CurrentJobId}`);
+    },
+
+    jobDelete(req, res) {
+      const CurrentJobId = req.params.job;
+
+      Job.data = Job.data.filter((job) => {
+        if (Number(job.id) !== Number(CurrentJobId)) {
+          return job;
+        }
+      });
+
+      res.redirect("/");
     },
 
     profile(req, res) {
@@ -115,5 +134,6 @@ routes.get("/meu-perfil", Job.controllers.profile);
 routes.post("/meu-perfil", Job.controllers.updateProfile);
 routes.post("/job", Job.controllers.newJob);
 routes.post("/job/:job", Job.controllers.jobEdit);
+routes.post("/job/delete/:job", Job.controllers.jobDelete);
 
 module.exports = routes;
