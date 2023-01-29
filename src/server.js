@@ -10,7 +10,7 @@ server.set("view engine", "ejs");
 
 // Setting directories
 server.use(express.static("src/assets"));
-server.set("views", path.join(__dirname, "/views"));
+server.set("views", path.join(__dirname, "views"));
 
 server.use(routes);
 
